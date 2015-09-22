@@ -17,13 +17,13 @@ import java.io.IOException;
  * @author Brian
  * @version 1.1
  */
-public class MBTiles implements IMBTiles {
+public class MBTiles implements MBTilesSQLite.Columns.MBTiles {
 
     private final static String[] COLUMNS_TILE_DATA = new String[]{COL_TILE_DATA};
     private final static String SELECTION = COL_TILE_COLUMN + "=? " + COL_TILE_ROW + "=? " + COL_ZOOM_LEVEL + "=?";
 
     private final SQLiteDatabase database;
-    private final MBTilesVersion version;
+    private final @MBTilesMetadata.VersionCode int versionCode;
     private final MBTilesMetadata metadata;
 
     /**
@@ -32,7 +32,7 @@ public class MBTiles implements IMBTiles {
      * @param database
      * @param version
      */
-    public MBTiles(SQLiteDatabase database, MBTilesVersion version) {
+    public MBTiles(SQLiteDatabase database, @MBTilesMetadata.VersionCode int version) {
         this(database, null, version);
     }
 
@@ -43,10 +43,10 @@ public class MBTiles implements IMBTiles {
      * @param metadata
      * @param version
      */
-    public MBTiles(SQLiteDatabase database, MBTilesMetadata metadata, MBTilesVersion version) {
+    public MBTiles(SQLiteDatabase database, MBTilesMetadata metadata, @MBTilesMetadata.VersionCode int version) {
         this.database = database;
         this.metadata = metadata;
-        this.version = version;
+        this.versionCode = version;
     }
 
     /**
@@ -58,7 +58,7 @@ public class MBTiles implements IMBTiles {
      * @param version
      * @return
      */
-    public static MBTiles create(SQLiteDatabase database, MBTilesMetadata metadata, MBTilesVersion version) {
+    public static MBTiles create(SQLiteDatabase database, MBTilesMetadata metadata, @MBTilesMetadata.VersionCode int version) {
 
         MBTilesSQLite.createTableTiles(database, version);
         MBTilesSQLite.createIndexTiles(database, version);
@@ -113,11 +113,11 @@ public class MBTiles implements IMBTiles {
 
         try {
             switch (this.metadata.format) {
-                case JPEG:
+                case MBTilesMetadata.TILE_FORMAT_JPEG:
                     tile.compress(CompressFormat.JPEG, 100, baos);
                     break;
 
-                case PNG:
+                case MBTilesMetadata.TILE_FORMAT_PNG:
                     tile.compress(CompressFormat.PNG, 100, baos);
                     break;
 

@@ -3,18 +3,17 @@
  */
 package de.slowpoke.mbtilesmap;
 
-import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
 import java.io.File;
 import java.util.HashMap;
 
-import de.slowpoke.mbtilesmap.MBTilesMetadata.LayerType;
-import de.slowpoke.mbtilesmap.MBTilesValidatorFactory.InvalidMetadataException;
-import de.slowpoke.mbtilesmap.MBTilesValidatorFactory.InvalidTilesException;
-import de.slowpoke.mbtilesmap.MBTilesValidatorFactory.MetadataValidator;
-import de.slowpoke.mbtilesmap.MBTilesValidatorFactory.TilesValidator;
-import de.slowpoke.mbtilesmap.MBTilesValidatorFactory.UnsupportedVersionException;
+import de.slowpoke.mbtilesmap.validator.MBTilesValidatorFactory;
+import de.slowpoke.mbtilesmap.validator.InvalidMetadataException;
+import de.slowpoke.mbtilesmap.validator.InvalidTilesException;
+import de.slowpoke.mbtilesmap.validator.MetadataValidator;
+import de.slowpoke.mbtilesmap.validator.TilesValidator;
+import de.slowpoke.mbtilesmap.validator.UnsupportedVersionException;
 
 /**
  * A map which maintains access to your {@link MBTiles}.
@@ -25,35 +24,27 @@ public class MBTilesMap extends HashMap<String, MBTiles> {
 
     private static final long serialVersionUID = -5959556653700563754L;
 
-    private final Context context;
-
     /**
      * Create a new {@link MBTiles} table.
-     *
-     * @param ctx Context
      */
-    public MBTilesMap(Context ctx) {
+    public MBTilesMap() {
         super();
-        this.context = ctx;
     }
 
     /**
      * Open an existing {@link MBTiles} file and add it to the map.
      *
-     * @param name    the name. If there is already an entry with that name, it will
-     *                be overwritten
-     * @param dbpath  the absolute path to the file. The file will be opened as an
-     *                {@link SQLiteDatabase} and the contents will be validated
+     * @param name    the name. If there is already an entry with that name, it will be overwritten
+     * @param dbpath  the absolute path to the file. The file will be opened as an {@link SQLiteDatabase} and the contents will be
+     *                validated
      * @param version the version of the {@link MBTiles}
-     * @return the newly opened {@link MBTiles} which has been added to the map,
-     * <code>null</code> if the {@link MBTiles} could not be opened
+     * @return the newly opened {@link MBTiles} which has been added to the map, <code>null</code> if the {@link MBTiles} could not be
+     * opened
      * @throws UnsupportedVersionException If the supplied <code>version</code> is not (yet) supported
-     * @throws InvalidMetadataException    If the metadata table doesn't meet the constraints as defined
-     *                                     by the specifications
-     * @throws InvalidTilesException       If the tiles table doesn't meet the constraints as defined by
-     *                                     the specifications
+     * @throws InvalidMetadataException    If the metadata table doesn't meet the constraints as defined by the specifications
+     * @throws InvalidTilesException       If the tiles table doesn't meet the constraints as defined by the specifications
      */
-    public MBTiles open(String name, File dbpath, MBTilesVersion version) throws InvalidMetadataException,
+    public MBTiles open(String name, File dbpath, @MBTilesMetadata.VersionCode int version) throws InvalidMetadataException,
             UnsupportedVersionException, InvalidTilesException {
         final SQLiteDatabase database = SQLiteDatabase.openDatabase(dbpath.getAbsolutePath(), null,
                 SQLiteDatabase.OPEN_READWRITE | SQLiteDatabase.NO_LOCALIZED_COLLATORS);
@@ -71,8 +62,7 @@ public class MBTilesMap extends HashMap<String, MBTiles> {
     }
 
     /**
-     * Create a new {@link MBTiles} and add it to the map with the supplied
-     * metadata.
+     * Create a new {@link MBTiles} and add it to the map with the supplied metadata.
      *
      * @param name        the name.
      * @param dbpath      the absolute path where the file shall be saved.
@@ -83,8 +73,8 @@ public class MBTilesMap extends HashMap<String, MBTiles> {
      * @param bounds      bounding box of the map. Might be <code>null</code>
      * @return the newly created {@link MBTiles} which has been added to the map
      */
-    public MBTiles create(String name, File dbpath, MBTilesVersion version, String description, LayerType type,
-                          MBTilesMetadata.TileFormat format, MBTilesBounds bounds) {
+    public MBTiles create(String name, File dbpath, @MBTilesMetadata.VersionCode int version, String description,
+                          @MBTilesMetadata.LayerType int type, @MBTilesMetadata.TileFormat int format, MBTilesBounds bounds) {
 
         final SQLiteDatabase database = SQLiteDatabase.openDatabase(dbpath.getAbsolutePath(), null,
                 SQLiteDatabase.CREATE_IF_NECESSARY | SQLiteDatabase.OPEN_READWRITE
@@ -99,13 +89,11 @@ public class MBTilesMap extends HashMap<String, MBTiles> {
     }
 
     /**
-     * Removes an {@link MBTiles} from the map. Mind that resources will be
-     * freed and the underlying database will be closed, so the returned
-     * {@link MBTiles} might not be very useful anymore.
+     * Removes an {@link MBTiles} from the map. Mind that resources will be freed and the underlying database will be closed, so the
+     * returned {@link MBTiles} might not be very useful anymore.
      *
      * @param name the name (key) of the {@link MBTiles} to be removed
-     * @return the {@link MBTiles} associated with the name, or
-     * <code>null</code> if this mapping is not available.
+     * @return the {@link MBTiles} associated with the name, or <code>null</code> if this mapping is not available.
      * @see HashMap#remove(Object)
      */
     @Override

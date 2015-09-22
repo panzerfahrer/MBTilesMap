@@ -1,5 +1,9 @@
 apply plugin: 'com.android.library'
 
+dependencies {
+    compile 'com.android.support:support-annotations:23.0.0'
+}
+
 android {
 
     compileSdkVersion ANDROID_BUILD_SDK_VERSION as int
